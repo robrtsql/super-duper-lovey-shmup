@@ -2,9 +2,15 @@ require 'util'
 require 'assets'
 require 'player'
 require 'shot'
+require 'meteor'
 
 GameState = {}
 GameState.__index = GameState
+GameState.timer = 1
+GameState.shots = {}
+GameState.meteors = {}
+GameState.width = 640
+GameState.height = 480
 
 function GameState.new()
     local self = {}
@@ -13,16 +19,26 @@ function GameState.new()
 end
 
 function GameState:load()
-    love.window.setMode(640, 480)
+    local mode = {}
+    mode.vsync = true
+    love.window.setMode(self.width, self.height, mode)
     bg = assets:getImage("art/backgrounds/1.png")
     player = Player.new()
-    self.shots = {}
 end
 
 function GameState:update(dt)
+    self.timer = self.timer - dt
+    if self.timer < 0 then
+        table.insert(self.meteors, Meteor.new(love.math.random(self.width)))
+        self.timer = 1
+    end
+
     player:update(self, dt)
-    for i=1, table.getn(self.shots) do
-        self.shots[i]:update(self, dt)
+    for i=table.getn(self.shots),1,-1 do
+        self.shots[i]:update(self, dt, i)
+    end
+    for i=table.getn(self.meteors),1,-1 do
+        self.meteors[i]:update(self, dt, i)
     end
 end
 
@@ -31,6 +47,9 @@ function GameState:draw()
     player:draw()
     for i=1, table.getn(self.shots) do
         self.shots[i]:draw()
+    end
+    for i=table.getn(self.meteors),1,-1 do
+        self.meteors[i]:draw()
     end
 end
 

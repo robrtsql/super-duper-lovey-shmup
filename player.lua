@@ -30,9 +30,8 @@ function Player:update(gamestate, dt)
     end
 
     if self.firing then
-        local size = table.getn(gamestate.shots)
-        gamestate.shots[size+1] = Shot.new(self.x + 3, self.y)
-        gamestate.shots[size+2] = Shot.new(self.x + 27, self.y)
+        table.insert(gamestate.shots, Shot.new(self.x + 3, self.y))
+        table.insert(gamestate.shots, Shot.new(self.x + 27, self.y))
     end
 
     self.firing = false

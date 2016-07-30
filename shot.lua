@@ -15,8 +15,11 @@ function Shot.new(x, y)
     return self
 end
 
-function Shot:update(gamestate, dt)
+function Shot:update(gamestate, dt, i)
     self.y = self.y - (self.speed * dt)
+    if self.y < 0 then
+        table.remove(gamestate.shots, i)
+    end
 end
 
 function Shot:draw()
