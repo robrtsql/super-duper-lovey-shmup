@@ -14,5 +14,5 @@ function love.draw()
 end
 
 function love.keypressed(key, scancode, isrepeat)
-    gamestate.keypressed(key, scancode, isrepeat)
+    gamestate:keypressed(key, scancode, isrepeat)
 end
