@@ -32,6 +32,16 @@ function Meteor:update(dt, i)
     self.x = actualX
     self.y = actualY
 
+    for i=1,len do
+        local other = cols[i].other
+        if other.type == "player" and not other.will_destroy then
+            other:destroy()
+            self.will_destroy = true
+            self:explode()
+            break
+        end
+    end
+
     if self.y > self.gamestate.height then
         self.will_destroy = true
     end

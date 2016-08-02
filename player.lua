@@ -10,9 +10,11 @@ Player.fireSound = assets:getSound("sounds/2.wav")
 Player.w = 38
 Player.h = 34
 Player.speed = 200
+Player.type = "player"
 
 --flags
 Player.firing = false
+Player.will_destroy = false
 
 function Player.new(gamestate)
     local self = {}
@@ -24,7 +26,7 @@ function Player.new(gamestate)
     return self
 end
 
-function Player:update(dt)
+function Player:update(dt, i)
     local goalX = self.x
     local goalY = self.y
     if love.keyboard.isDown("w") then
@@ -47,11 +49,21 @@ function Player:update(dt)
         self:_fire()
     end
 
+    if self.will_destroy then
+        self:_destroy(i)
+    end
+
     self.firing = false
 end
 
 function Player:draw()
     love.graphics.draw(self.sprite, round(self.x), round(self.y))
+end
+
+function Player:destroy(i)
+    self.will_destroy = true
+    table.insert(self.gamestate.fx, Explosion.new(self.gamestate,
+        self.x + 8, self.y + 4))
 end
 
 function Player:fire()
@@ -63,6 +75,11 @@ function Player:_fire()
     self.fireSound:play()
     table.insert(self.gamestate.shots, Shot.new(self.gamestate, self.x + 3, self.y))
     table.insert(self.gamestate.shots, Shot.new(self.gamestate, self.x + 27, self.y))
+end
+
+function Player:_destroy(i)
+    table.remove(self.gamestate.players, i)
+    self.gamestate.world:remove(self)
 end
 
 function Player:bump_filter(other)
