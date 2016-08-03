@@ -1,30 +1,32 @@
 require 'util'
 require 'assets'
+require 'enemyshot'
 
-Meteor = {}
-Meteor.__index = Meteor
+BabyOcto = {}
+BabyOcto.__index = BabyOcto
 
-Meteor.sprite = assets:getImage("art/backgrounds/meteor-1.png")
-Meteor.speed = 200
-Meteor.y = -30
-Meteor.w = 42
-Meteor.h = 39
-Meteor.type = "meteor"
+BabyOcto.sprite = assets:getImage("art/ships/10.png")
+BabyOcto.speed = 100
+BabyOcto.y = -25
+BabyOcto.w = 27
+BabyOcto.h = 25
+BabyOcto.type = "babyocto"
+BabyOcto.shottimer = 0.25
 
 --flags
-Meteor.will_destroy = false
-Meteor.will_explode = false
+BabyOcto.will_destroy = false
+BabyOcto.will_explode = false
 
-function Meteor.new(gamestate, x)
+function BabyOcto.new(gamestate, x)
     local self = {}
-    setmetatable(self,Meteor)
+    setmetatable(self,BabyOcto)
     self.gamestate = gamestate
     self.x = x
     self.gamestate.world:add(self, self.x, self.y, self.w, self.h)
     return self
 end
 
-function Meteor:update(dt, i)
+function BabyOcto:update(dt, i)
     local goalY = self.y + (self.speed * dt)
 
     local actualX, actualY, cols, len = self.gamestate.world:move(self, self.x,
@@ -42,6 +44,13 @@ function Meteor:update(dt, i)
         end
     end
 
+    self.shottimer = self.shottimer - dt
+    if self.shottimer < 0 then
+        table.insert(self.gamestate.bads,
+            EnemyShot.new(self.gamestate, self.x, self.y))
+        self.shottimer = (love.math.random(20) + 20) / 20
+    end
+
     if self.y > self.gamestate.height then
         self.will_destroy = true
     end
@@ -57,25 +66,25 @@ function Meteor:update(dt, i)
     self.will_destroy = false
 end
 
-function Meteor:draw()
+function BabyOcto:draw()
     love.graphics.draw(self.sprite, round(self.x), round(self.y))
 end
 
-function Meteor:explode()
+function BabyOcto:explode()
     self.will_explode = true
     self.will_destroy = true
 end
 
-function Meteor:_explode()
+function BabyOcto:_explode()
     table.insert(self.gamestate.fx, Explosion.new(self.gamestate,
         self.x + 8, self.y + 4))
 end
 
-function Meteor:_destroy(i)
+function BabyOcto:_destroy(i)
     table.remove(self.gamestate.bads, i)
     self.gamestate.world:remove(self)
 end
 
-function Meteor:bump_filter(other)
+function BabyOcto:bump_filter(other)
     return "cross"
 end

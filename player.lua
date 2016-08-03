@@ -40,13 +40,18 @@ function Player:update(dt, i)
         goalX = self.x + (self.speed * dt)
     end
 
+    goalX = clamp(goalX, 0, self.gamestate.width - self.w)
+    goalY = clamp(goalY, 0, self.gamestate.height - self.h)
+
     local actualX, actualY, cols, len = self.gamestate.world:move(self, goalX,
         goalY, self.bump_filter)
     self.x = actualX
     self.y = actualY
 
     if self.firing then
-        self:_fire()
+        if table.getn(self.gamestate.shots) < 8 then
+            self:_fire()
+        end
     end
 
     if self.will_destroy then

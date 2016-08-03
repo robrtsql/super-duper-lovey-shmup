@@ -3,14 +3,16 @@ require 'assets'
 require 'player'
 require 'shot'
 require 'meteor'
+require 'babyocto'
 local bump = require 'bump'
 
 GameState = {}
 GameState.__index = GameState
-GameState.timer = 1
+GameState.meteortimer = 1
+GameState.babyoctotimer = 1
 GameState.players = {}
 GameState.shots = {}
-GameState.meteors = {}
+GameState.bads = {}
 GameState.fx = {}
 GameState.width = 640
 GameState.height = 480
@@ -31,18 +33,8 @@ function GameState:load()
 end
 
 function GameState:update(dt)
-    self.timer = self.timer - dt
-    if self.timer < 0 then
-        local spawnmultiple = love.math.random(10)
-        if spawnmultiple > 9 then
-            table.insert(self.meteors, Meteor.new(self, love.math.random(self.width - Meteor.w)))
-        end
-        if spawnmultiple > 8 then
-            table.insert(self.meteors, Meteor.new(self, love.math.random(self.width - Meteor.w)))
-        end
-        table.insert(self.meteors, Meteor.new(self, love.math.random(self.width - Meteor.w)))
-        self.timer = 0.5
-    end
+    self:_update_spawn_meteors(dt)
+    self:_update_spawn_babyoctos(dt)
 
     for i=table.getn(self.players),1,-1 do
         self.players[i]:update(dt, i)
@@ -50,24 +42,54 @@ function GameState:update(dt)
     for i=table.getn(self.shots),1,-1 do
         self.shots[i]:update(dt, i)
     end
-    for i=table.getn(self.meteors),1,-1 do
-        self.meteors[i]:update(dt, i)
+    for i=table.getn(self.bads),1,-1 do
+        self.bads[i]:update(dt, i)
     end
     for i=table.getn(self.fx),1,-1 do
         self.fx[i]:update(dt, i)
     end
 end
 
+function GameState:_update_spawn_meteors(dt)
+    self.meteortimer = self.meteortimer - dt
+    if self.meteortimer < 0 then
+        local spawnmultiple = love.math.random(10)
+        if spawnmultiple > 9 then
+            table.insert(self.bads, Meteor.new(self, love.math.random(self.width - Meteor.w)))
+        end
+        if spawnmultiple > 8 then
+            table.insert(self.bads, Meteor.new(self, love.math.random(self.width - Meteor.w)))
+        end
+        table.insert(self.bads, Meteor.new(self, love.math.random(self.width - Meteor.w)))
+        self.meteortimer = (love.math.random(4) + 4) / 10
+    end
+end
+
+function GameState:_update_spawn_babyoctos(dt)
+    self.babyoctotimer = self.babyoctotimer - dt
+    if self.babyoctotimer < 0 then
+        local spawnmultiple = love.math.random(10)
+        if spawnmultiple > 9 then
+            table.insert(self.bads, BabyOcto.new(self, love.math.random(self.width - BabyOcto.w)))
+        end
+        if spawnmultiple > 8 then
+            table.insert(self.bads, BabyOcto.new(self, love.math.random(self.width - BabyOcto.w)))
+        end
+        table.insert(self.bads, BabyOcto.new(self, love.math.random(self.width - BabyOcto.w)))
+        self.babyoctotimer = (love.math.random(4) + 4) / 10 
+    end
+end
+
 function GameState:draw()
     love.graphics.draw(bg, 0, 0)
-    for i=1, table.getn(self.players) do
+    for i=table.getn(self.players),1,-1 do
         self.players[i]:draw()
     end
-    for i=1, table.getn(self.shots) do
+    for i=table.getn(self.shots),1,-1 do
         self.shots[i]:draw()
     end
-    for i=table.getn(self.meteors),1,-1 do
-        self.meteors[i]:draw()
+    for i=table.getn(self.bads),1,-1 do
+        self.bads[i]:draw()
     end
     for i=table.getn(self.fx),1,-1 do
         self.fx[i]:draw()
